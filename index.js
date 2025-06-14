@@ -1,7 +1,20 @@
 const { readFileSync } = require("fs");
 
+function formatarMoeda(valor) {
+  return new Intl.NumberFormat("pt-BR",
+    { style: "currency", currency: "BRL", minimumFractionDigits: 2 })
+    .format(valor / 100);
+}
+
 function getPeca(pecas, apre) {
   return pecas[apre.id];
+}
+
+function calcularCredito(pecas, apre) {
+  let creditos = Math.max(apre.audiencia - 30, 0);
+  if (getPeca(pecas, apre).tipo === "comedia")
+    creditos += Math.floor(apre.audiencia / 5);
+  return creditos;
 }
 
 function calcularTotalApresentacao(pecas, apre) {
@@ -24,19 +37,6 @@ function calcularTotalApresentacao(pecas, apre) {
   return total;
 }
 
-function calcularCredito(pecas, apre) {
-  let creditos = Math.max(apre.audiencia - 30, 0);
-  if (getPeca(pecas, apre).tipo === "comedia")
-    creditos += Math.floor(apre.audiencia / 5);
-  return creditos;
-}
-
-function formatarMoeda(valor) {
-  return new Intl.NumberFormat("pt-BR",
-    { style: "currency", currency: "BRL", minimumFractionDigits: 2 })
-    .format(valor / 100);
-}
-
 function calcularTotalFatura(pecas, apresentacoes) {
   return apresentacoes
     .reduce((tot, apre) => tot + calcularTotalApresentacao(pecas, apre), 0);
@@ -48,7 +48,6 @@ function calcularTotalCreditos(pecas, apresentacoes) {
 }
 
 function gerarFaturaStr(fatura, pecas) {
-
   let faturaStr = `Fatura ${fatura.cliente}\n`;
   for (let apre of fatura.apresentacoes) {
     faturaStr += `  ${getPeca(pecas, apre).nome}: `
